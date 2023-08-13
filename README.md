@@ -12,9 +12,8 @@
 
 ## Setup
 
-1. Clone this repository & open it in a terminal
-2. `cargo build --release`
-3. Set the required environment variables:
+1. `cargo install --git https://github.com/ellsclytn/jellyfin-ryot-import.git`
+2. Set the required environment variables:
 
    - `JF_BASE_URL`: the URL to your Jellyfin instance in the format https://jellyfin.instance (no trailing slash)
    - `JF_API_KEY`: a Jellyfin API key
