@@ -4,6 +4,15 @@
 
 ---
 
+## Features
+
+- Supports both movies and TV show data exports
+
+## Limitations
+
+- Does not support timestamps. All watched media will be marked as watched in Ryot without a watch date associated.
+- Only uploads watched data. It will not export unwatched Jellyfin media to JSON.
+
 ## Requirements
 
 - [Rust toolchain](https://www.rust-lang.org/tools/install)
