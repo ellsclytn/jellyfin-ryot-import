@@ -2,6 +2,12 @@ use crate::error::Result;
 use crate::ryot;
 use reqwest::{header, Client, RequestBuilder};
 use std::env;
+use std::rc::Rc;
+
+#[derive(serde::Deserialize, serde::Serialize, Debug)]
+pub struct Boilerplate {
+    pub media: Vec<Rc<ryot::Item>>,
+}
 
 #[derive(serde::Deserialize, serde::Serialize, Debug)]
 #[serde(rename_all = "PascalCase")]
@@ -73,6 +79,16 @@ impl Jellyfin {
         Ok(req)
     }
 
+    fn print_as_json(&self, items: &[Rc<ryot::Item>]) -> Result<()> {
+        let boilerplate = Boilerplate {
+            media: items.to_owned(),
+        };
+
+        let json = serde_json::to_string(&boilerplate)?;
+        println!("{}", json);
+        Ok(())
+    }
+
     pub async fn get_items(&self, parent_id: Option<&str>) -> Result<Items> {
         let parent_id = match parent_id {
             Some(id) => id,
@@ -92,7 +108,7 @@ impl Jellyfin {
 
     pub async fn get_ryot_shows_json(&self) -> Result<()> {
         let shows = self.get_items(None).await?;
-        let mut ryot_items: Vec<ryot::Item> = Vec::new();
+        let mut ryot_items: Vec<Rc<ryot::Item>> = Vec::new();
 
         for show in shows.items.iter() {
             let tmdb_id = match &show.provider_ids {
@@ -132,21 +148,20 @@ impl Jellyfin {
                 }
             }
 
-            let ryot_show = ryot::Item {
+            let ryot_show = Rc::new(ryot::Item {
                 identifier: tmdb_id.to_string(),
                 collections: vec![],
-                lot: "Show".to_string(),
+                lot: "show".to_string(),
                 reviews: vec![],
                 seen_history,
-                source: "Tmdb".to_string(),
+                source: "tmdb".to_string(),
                 source_id: show.id.to_string(),
-            };
+            });
 
             ryot_items.push(ryot_show);
         }
 
-        let json = serde_json::to_string(&ryot_items)?;
-        println!("{}", json);
+        self.print_as_json(&ryot_items)?;
 
         Ok(())
     }
@@ -154,7 +169,7 @@ impl Jellyfin {
     pub async fn get_ryot_movies_json(&self) -> Result<()> {
         let movie_library_id = env::var("JF_MOVIE_LIBRARY_ID")?;
         let movies = self.get_items(Some(&movie_library_id)).await?;
-        let mut ryot_items: Vec<ryot::Item> = Vec::new();
+        let mut ryot_items: Vec<Rc<ryot::Item>> = Vec::new();
 
         for movie in movies.items.iter() {
             let tmdb_id = match &movie.provider_ids {
@@ -174,21 +189,20 @@ impl Jellyfin {
                 show_season_number: None,
             }];
 
-            let ryot_movie = ryot::Item {
+            let ryot_movie = Rc::new(ryot::Item {
                 identifier: tmdb_id.to_string(),
                 collections: vec![],
-                lot: "Movie".to_string(),
+                lot: "movie".to_string(),
                 reviews: vec![],
                 seen_history,
-                source: "Tmdb".to_string(),
+                source: "tmdb".to_string(),
                 source_id: movie.id.to_string(),
-            };
+            });
 
             ryot_items.push(ryot_movie);
         }
 
-        let json = serde_json::to_string(&ryot_items)?;
-        println!("{}", json);
+        self.print_as_json(&ryot_items)?;
 
         Ok(())
     }
