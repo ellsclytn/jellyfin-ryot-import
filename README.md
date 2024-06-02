@@ -47,4 +47,4 @@ $ jellyfin-ryot-import shows > shows.json
 $ jellyfin-ryot-import movies > movies.json
 ```
 
-The JSON files generated can be imported in Ryot by going to Settings > Imports and choosing "Media JSON" as the source.
+The JSON files generated can be imported in Ryot by going to Settings > Imports and choosing "Generic Json" as the source.
